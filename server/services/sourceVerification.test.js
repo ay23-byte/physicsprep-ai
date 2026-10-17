@@ -54,3 +54,30 @@ test("matches whitespace-normalized quotations", () => {
 
   assert.equal(result.verified, true);
 });
+
+test("matches quotations despite PDF capitalization and typographic variants", () => {
+  const result = verifyQuestionEvidence(
+    { sourceEvidence: "“ENERGY is conserved in an iso-\n lated system.”" },
+    "Energy is conserved in an isolated system."
+  );
+
+  assert.equal(result.verified, true);
+});
+
+test("matches words split by a PDF line-end hyphen", () => {
+  const result = verifyQuestionEvidence(
+    { sourceEvidence: "electro-magnetic field" },
+    "The electro-\nmagnetic field stores energy."
+  );
+
+  assert.equal(result.verified, true);
+});
+
+test("does not accept a paraphrase that is not present in the source", () => {
+  const result = verifyQuestionEvidence(
+    { sourceEvidence: "Energy is always conserved." },
+    "Energy is conserved in an isolated system."
+  );
+
+  assert.equal(result.verified, false);
+});
