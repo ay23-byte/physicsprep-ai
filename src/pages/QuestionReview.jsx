@@ -142,6 +142,8 @@ export default function QuestionReview() {
   }, []);
 
   useEffect(() => {
+    // Async request is triggered here; response state updates happen after awaiting fetch.
+    // eslint-disable-next-line react/set-state-in-effect
     loadQuestions();
   }, [loadQuestions]);
 
