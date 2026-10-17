@@ -1,11 +1,12 @@
 
-import QuestionReview from "./pages/QuestionReview.jsx";
-import { useCallback, useEffect, useState } from "react";
-import Generator from "./pages/Generator.jsx";
-import PDFLibrary from "./pages/PDFLibrary.jsx";
-import ExportQuestions from "./pages/ExportQuestions.jsx";
-import QuestionBank from "./pages/QuestionBank.jsx";
-import CoverageTracker from "./pages/CoverageTracker.jsx";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+
+const QuestionReview = lazy(() => import("./pages/QuestionReview.jsx"));
+const Generator = lazy(() => import("./pages/Generator.jsx"));
+const PDFLibrary = lazy(() => import("./pages/PDFLibrary.jsx"));
+const ExportQuestions = lazy(() => import("./pages/ExportQuestions.jsx"));
+const QuestionBank = lazy(() => import("./pages/QuestionBank.jsx"));
+const CoverageTracker = lazy(() => import("./pages/CoverageTracker.jsx"));
 import {
   Activity,
   ArrowDownToLine,
@@ -326,29 +327,37 @@ function App() {
           </div>
         )}
 
-        {activePage === "Overview" ? (
-          <Dashboard
-            stats={dashboardStats}
-            subjects={subjects}
-            searchQuery={searchQuery}
-            onNavigate={navigate}
-            onRefresh={loadDashboardStats}
-          />
-        ) : activePage === "PDF Library" ? (
-          <PDFLibrary />
-        ) : activePage === "AI Generator" ? (
-          <Generator />
-        ) : activePage === "Question Review" ? (
-          <QuestionReview />
-        ) : activePage === "Question Bank" ? (
-          <QuestionBank />
-        ) : activePage === "Export Questions" ? (
-          <ExportQuestions />
-        ) : activePage === "Coverage Tracker" ? (
-          <CoverageTracker />
-        ) : (
-          <WorkspacePage page={activePage} onNavigate={navigate} />
-        )}
+        <Suspense
+          fallback={
+            <div className="page-content" role="status" aria-live="polite">
+              <p>Loading workspace page…</p>
+            </div>
+          }
+        >
+          {activePage === "Overview" ? (
+            <Dashboard
+              stats={dashboardStats}
+              subjects={subjects}
+              searchQuery={searchQuery}
+              onNavigate={navigate}
+              onRefresh={loadDashboardStats}
+            />
+          ) : activePage === "PDF Library" ? (
+            <PDFLibrary />
+          ) : activePage === "AI Generator" ? (
+            <Generator />
+          ) : activePage === "Question Review" ? (
+            <QuestionReview />
+          ) : activePage === "Question Bank" ? (
+            <QuestionBank />
+          ) : activePage === "Export Questions" ? (
+            <ExportQuestions />
+          ) : activePage === "Coverage Tracker" ? (
+            <CoverageTracker />
+          ) : (
+            <WorkspacePage page={activePage} onNavigate={navigate} />
+          )}
+        </Suspense>
       </main>
     </div>
   );
