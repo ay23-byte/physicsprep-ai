@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import "./QuestionReview.css";
 
-const API_URL = "http://localhost:3001/api/questions";
+const API_URL = `${import.meta.env.VITE_API_BASE_URL || ""}/api/questions`;
 
 function getStatus(question) {
   return (
