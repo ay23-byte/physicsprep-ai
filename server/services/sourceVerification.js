@@ -1,14 +1,4 @@
 
-function normalizeText(text) {
-    return String(text ?? "")
-      .normalize("NFKC")
-      .toLowerCase()
-      .replace(/\s+/g, " ")
-      .replace(/[“”]/g, '"')
-      .replace(/[‘’]/g, "'")
-      .trim();
-  }
-
 function normalizeWhitespace(text) {
   return String(text ?? "").replace(/\s+/g, " ").trim();
 }
