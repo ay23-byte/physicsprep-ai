@@ -176,6 +176,12 @@ function isApproved(question) {
   );
 }
 function hasValidEvidence(question) {
+  // Trust the server's verification against the linked PDF, not just the
+  // database status label. Old records may incorrectly say "verified".
+  if (question.evidenceValid !== true && question.evidence_valid !== true) {
+    return false;
+  }
+
   const evidence = getSourceEvidence(question).trim();
   const evidenceStatus = getEvidenceStatus(question).toLowerCase();
 
