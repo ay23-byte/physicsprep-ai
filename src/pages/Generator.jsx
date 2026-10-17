@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { InlineMath, BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 
-const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_BASE_URL || "";
 
 const fieldStyle = {
   display: "block",
