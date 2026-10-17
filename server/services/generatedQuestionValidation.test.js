@@ -43,3 +43,34 @@ test("rejects incomplete questions even when evidence is present", () => {
     /malformed question/i
   );
 });
+
+
+test("rejects missing or placeholder source evidence", () => {
+  const completeQuestion = {
+    question: "Which quantity is conserved?",
+    options: ["Energy", "Force", "Velocity", "Position"],
+    answer: "Energy",
+    explanation: "Energy is conserved in an isolated system.",
+    sourceEvidence: "Energy is conserved in an isolated system.",
+    topic: "Classical Mechanics",
+    difficulty: "Medium",
+  };
+
+  for (const sourceEvidence of [
+    "",
+    "   ",
+    "No supporting quotation was provided.",
+    "Test question for checking the save and review workflow",
+  ]) {
+    assert.throws(
+      () =>
+        validateGeneratedQuestionList(
+          {
+            questions: [{ ...completeQuestion, sourceEvidence }],
+          },
+          { requestedCount: 1, questionType: "MCQ" }
+        ),
+      /malformed question/i
+    );
+  }
+});
