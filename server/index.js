@@ -58,9 +58,15 @@ app.use((err, req, res, next) => {
     return next(err);
   }
 
-  if (err?.type === "entity.parse.failed" || err instanceof SyntaxError && err?.status === 400) {
+  if (err?.type === "entity.parse.failed" || (err instanceof SyntaxError && err?.status === 400)) {
     return res.status(400).json({
       error: "Request body contains invalid JSON.",
+    });
+  }
+
+  if (err?.message === "Origin is not allowed by CORS.") {
+    return res.status(403).json({
+      error: "This origin is not allowed to access the API.",
     });
   }
 
