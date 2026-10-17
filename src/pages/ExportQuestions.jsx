@@ -1,6 +1,5 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { jsPDF } from "jspdf";
 import {
   ArrowDownToLine,
   CheckCircle2,
@@ -11,14 +10,6 @@ import {
   RotateCcw,
   FileSpreadsheet,
 } from "lucide-react";
-import {
-  Document,
-  HeadingLevel,
-  Packer,
-  Paragraph,
-  TextRun,
-  PageBreak,
-} from "docx";
 
 const API_URL = `${import.meta.env.VITE_API_BASE_URL || ""}/api/questions`;
 
@@ -462,7 +453,7 @@ export default function ExportQuestions() {
     return y;
   }
 
-  function exportPDF() {
+  async function exportPDF() {
     if (filteredQuestions.length === 0) {
       setError("No approved questions match the selected filters.");
       return;
@@ -471,6 +462,7 @@ export default function ExportQuestions() {
     try {
       setError("");
 
+      const { jsPDF } = await import("jspdf");
       const doc = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -639,6 +631,8 @@ export default function ExportQuestions() {
 
     try {
       setError("");
+      const { Document, HeadingLevel, Packer, Paragraph, TextRun, PageBreak } =
+        await import("docx");
 
       const selectedDocument =
         documentFilter === "all"
