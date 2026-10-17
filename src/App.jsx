@@ -128,9 +128,7 @@ function App() {
   }, [loadDashboardStats]);
 
   const actualQuestions = dashboardStats?.totalQuestions ?? 0;
-  const approvedQuestions = dashboardStats?.approved ?? 0;
   const pendingQuestions = dashboardStats?.pending ?? 0;
-  const totalDocuments = dashboardStats?.totalDocuments ?? 0;
 
   const progressPercentage = Math.min(
     100,
