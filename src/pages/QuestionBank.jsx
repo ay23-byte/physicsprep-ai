@@ -372,6 +372,9 @@ export default function QuestionBank() {
   }, []);
 
   useEffect(() => {
+    // Load the current question list when the page mounts.
+    // This async loader updates state after its fetch completes.
+    // eslint-disable-next-line react/set-state-in-effect
     loadQuestions();
   }, [loadQuestions]);
 
