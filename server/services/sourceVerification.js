@@ -10,7 +10,8 @@ function normalizeForEvidenceMatch(text) {
     .replace(/[\u00AD\u200B\uFEFF]/g, "")
     .replace(/\s+/g, " ")
     .trim()
-    .toLocaleLowerCase("en");
+    .toLocaleLowerCase("en")
+    .replace(/^[\'"]+|[\'"]+$/g, "");
 }
 
 export function verifyQuestionEvidence(question, sourceText) {
