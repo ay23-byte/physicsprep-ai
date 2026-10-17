@@ -11,7 +11,7 @@ function normalizeForEvidenceMatch(text) {
     .replace(/\s+/g, " ")
     .trim()
     .toLocaleLowerCase("en")
-    .replace(/^[\'"]+|[\'"]+$/g, "");
+    .replace(/^['"]+|['"]+$/g, "");
 }
 
 export function verifyQuestionEvidence(question, sourceText) {
