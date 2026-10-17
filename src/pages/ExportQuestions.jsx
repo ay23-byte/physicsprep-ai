@@ -20,7 +20,7 @@ import {
   PageBreak,
 } from "docx";
 
-const API_URL = "http://localhost:3001/api/questions";
+const API_URL = `${import.meta.env.VITE_API_BASE_URL || ""}/api/questions`;
 
 const selectStyle = {
   display: "block",
