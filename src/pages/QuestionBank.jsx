@@ -517,6 +517,8 @@ export default function QuestionBank() {
   );
 
   useEffect(() => {
+    // Reset pagination when the user changes filters; this is derived UI state.
+    // eslint-disable-next-line react/set-state-in-effect
     setCurrentPage(1);
     setExpandedId(null);
   }, [
@@ -532,6 +534,8 @@ export default function QuestionBank() {
 
   useEffect(() => {
     if (currentPage > totalPages) {
+      // Keep the current page within the filtered result range.
+      // eslint-disable-next-line react/set-state-in-effect
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);
