@@ -66,7 +66,7 @@ test("matches quotations despite PDF capitalization and typographic variants", (
 
 test("matches words split by a PDF line-end hyphen", () => {
   const result = verifyQuestionEvidence(
-    { sourceEvidence: "electro-magnetic field" },
+    { sourceEvidence: "electromagnetic field" },
     "The electro-\nmagnetic field stores energy."
   );
 
