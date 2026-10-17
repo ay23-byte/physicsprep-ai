@@ -4,7 +4,7 @@ import { verifyQuestionEvidence } from "./sourceVerification.js";
 
 test("accepts a quotation that appears in the linked PDF text", () => {
   const result = verifyQuestionEvidence(
-    { sourceEvidence: "Energy is conserved in an isolated system." },
+    { sourceEvidence: "energy is conserved in an isolated system." },
     "In mechanics, energy is conserved in an isolated system."
   );
 
