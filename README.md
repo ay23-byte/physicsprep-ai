@@ -21,6 +21,8 @@ Create a local `.env` file in the project root. Do not commit this file:
 ```dotenv
 GEMINI_API_KEY=your_gemini_api_key_here
 PORT=3001
+# Optional: comma-separated additional browser origins for a separately hosted frontend
+# CORS_ORIGINS=https://your-frontend.example.com
 ```
 
 The backend loads environment variables from `.env`. Keep your real API key private. The Vite development server proxies `/api` requests to `http://localhost:3001`, so the frontend does not need a hardcoded localhost API URL. For a separately hosted API, set `VITE_API_BASE_URL` in the frontend environment (for example, `https://api.example.com`) before building; do not put secrets in `VITE_` variables.
