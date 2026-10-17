@@ -23,7 +23,7 @@ GEMINI_API_KEY=your_gemini_api_key_here
 PORT=3001
 ```
 
-The backend loads environment variables from `.env`. Keep your real API key private.
+The backend loads environment variables from `.env`. Keep your real API key private. The Vite development server proxies `/api` requests to `http://localhost:3001`, so the frontend does not need a hardcoded localhost API URL. For a separately hosted API, set `VITE_API_BASE_URL` in the frontend environment (for example, `https://api.example.com`) before building; do not put secrets in `VITE_` variables.
 
 ## Run the app
 
@@ -93,7 +93,7 @@ The SQLite database is stored under `server/data/`, which is intentionally ignor
 
 ## Troubleshooting
 
-- **Port 3001 is busy:** stop the other API process or set `PORT` in `.env` to another free port. If you change the backend port, ensure the frontend API configuration matches it.
+- **Port 3001 is busy:** stop the other API process or set `PORT` in `.env` to another free port. If you change the backend port for local development, update the Vite proxy target in `vite.config.js` to match.
 - **Frontend loads but questions do not:** check that the API terminal is still running and visit `/api/health`.
 - **AI generation fails:** confirm `GEMINI_API_KEY` is present in the root `.env` and restart the backend.
 - **Evidence says invalid:** the quotation must match text extracted from the exact linked PDF. Do not mark it verified just to bypass the check.
