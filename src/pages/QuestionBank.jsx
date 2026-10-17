@@ -19,7 +19,7 @@ import {
   CircleHelp,
 } from "lucide-react";
 
-const API_URL = "http://localhost:3001/api/questions";
+const API_URL = `${import.meta.env.VITE_API_BASE_URL || ""}/api/questions`;
 
 const controlStyle = {
   width: "100%",
@@ -372,6 +372,9 @@ export default function QuestionBank() {
   }, []);
 
   useEffect(() => {
+    // Load the current question list when the page mounts.
+    // This async loader updates state after its fetch completes.
+    // eslint-disable-next-line react/set-state-in-effect
     loadQuestions();
   }, [loadQuestions]);
 
@@ -517,6 +520,8 @@ export default function QuestionBank() {
   );
 
   useEffect(() => {
+    // Reset pagination when the user changes filters; this is derived UI state.
+    // eslint-disable-next-line react/set-state-in-effect
     setCurrentPage(1);
     setExpandedId(null);
   }, [
@@ -532,6 +537,8 @@ export default function QuestionBank() {
 
   useEffect(() => {
     if (currentPage > totalPages) {
+      // Keep the current page within the filtered result range.
+      // eslint-disable-next-line react/set-state-in-effect
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);

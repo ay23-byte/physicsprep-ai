@@ -19,7 +19,7 @@ import {
 
 import "../App.css";
 
-const API_URL = "http://localhost:3001/api/pdf";
+const API_URL = `${import.meta.env.VITE_API_BASE_URL || ""}/api/pdf`;
 
 export default function PDFLibrary() {
   const fileInputRef = useRef(null);
@@ -59,6 +59,8 @@ export default function PDFLibrary() {
   }, []);
 
   useEffect(() => {
+    // Async request is triggered here; response state updates happen after awaiting fetch.
+    // eslint-disable-next-line react/set-state-in-effect
     loadDocuments();
   }, [loadDocuments]);
 

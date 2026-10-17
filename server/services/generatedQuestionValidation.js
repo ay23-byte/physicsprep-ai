@@ -28,6 +28,9 @@ export function validateGeneratedQuestionList(
       !question.answer.trim() ||
       typeof question.explanation !== "string" ||
       !question.explanation.trim() ||
+      typeof question.sourceEvidence !== "string" ||
+      !question.sourceEvidence.trim() ||
+      /no supporting quotation was provided|test question for checking the save and review workflow/i.test(question.sourceEvidence.trim()) ||
       typeof question.topic !== "string" ||
       !question.topic.trim() ||
       !DIFFICULTIES.includes(question.difficulty)

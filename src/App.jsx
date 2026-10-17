@@ -1,11 +1,12 @@
 
-import QuestionReview from "./pages/QuestionReview.jsx";
-import { useCallback, useEffect, useState } from "react";
-import Generator from "./pages/Generator.jsx";
-import PDFLibrary from "./pages/PDFLibrary.jsx";
-import ExportQuestions from "./pages/ExportQuestions.jsx";
-import QuestionBank from "./pages/QuestionBank.jsx";
-import CoverageTracker from "./pages/CoverageTracker.jsx";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+
+const QuestionReview = lazy(() => import("./pages/QuestionReview.jsx"));
+const Generator = lazy(() => import("./pages/Generator.jsx"));
+const PDFLibrary = lazy(() => import("./pages/PDFLibrary.jsx"));
+const ExportQuestions = lazy(() => import("./pages/ExportQuestions.jsx"));
+const QuestionBank = lazy(() => import("./pages/QuestionBank.jsx"));
+const CoverageTracker = lazy(() => import("./pages/CoverageTracker.jsx"));
 import {
   Activity,
   ArrowDownToLine,
@@ -34,7 +35,7 @@ import {
 } from "lucide-react";
 import "./App.css";
 
-const API_URL = "http://localhost:3001/api/dashboard/stats";
+const API_URL = `${import.meta.env.VITE_API_BASE_URL || ""}/api/dashboard/stats`;
 const QUESTION_TARGET = 450;
 
 const navigation = [
@@ -120,6 +121,8 @@ function App() {
   }, []);
 
   useEffect(() => {
+    // Async request is triggered here; response state updates happen after awaiting fetch.
+    // eslint-disable-next-line react/set-state-in-effect
     loadDashboardStats();
 
     const intervalId = setInterval(loadDashboardStats, 15000);
@@ -128,9 +131,7 @@ function App() {
   }, [loadDashboardStats]);
 
   const actualQuestions = dashboardStats?.totalQuestions ?? 0;
-  const approvedQuestions = dashboardStats?.approved ?? 0;
   const pendingQuestions = dashboardStats?.pending ?? 0;
-  const totalDocuments = dashboardStats?.totalDocuments ?? 0;
 
   const progressPercentage = Math.min(
     100,
@@ -328,29 +329,37 @@ function App() {
           </div>
         )}
 
-        {activePage === "Overview" ? (
-          <Dashboard
-            stats={dashboardStats}
-            subjects={subjects}
-            searchQuery={searchQuery}
-            onNavigate={navigate}
-            onRefresh={loadDashboardStats}
-          />
-        ) : activePage === "PDF Library" ? (
-          <PDFLibrary />
-        ) : activePage === "AI Generator" ? (
-          <Generator />
-        ) : activePage === "Question Review" ? (
-          <QuestionReview />
-        ) : activePage === "Question Bank" ? (
-          <QuestionBank />
-        ) : activePage === "Export Questions" ? (
-          <ExportQuestions />
-        ) : activePage === "Coverage Tracker" ? (
-          <CoverageTracker />
-        ) : (
-          <WorkspacePage page={activePage} onNavigate={navigate} />
-        )}
+        <Suspense
+          fallback={
+            <div className="page-content" role="status" aria-live="polite">
+              <p>Loading workspace page…</p>
+            </div>
+          }
+        >
+          {activePage === "Overview" ? (
+            <Dashboard
+              stats={dashboardStats}
+              subjects={subjects}
+              searchQuery={searchQuery}
+              onNavigate={navigate}
+              onRefresh={loadDashboardStats}
+            />
+          ) : activePage === "PDF Library" ? (
+            <PDFLibrary />
+          ) : activePage === "AI Generator" ? (
+            <Generator />
+          ) : activePage === "Question Review" ? (
+            <QuestionReview />
+          ) : activePage === "Question Bank" ? (
+            <QuestionBank />
+          ) : activePage === "Export Questions" ? (
+            <ExportQuestions />
+          ) : activePage === "Coverage Tracker" ? (
+            <CoverageTracker />
+          ) : (
+            <WorkspacePage page={activePage} onNavigate={navigate} />
+          )}
+        </Suspense>
       </main>
     </div>
   );

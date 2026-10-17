@@ -1,6 +1,5 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { jsPDF } from "jspdf";
 import {
   ArrowDownToLine,
   CheckCircle2,
@@ -11,16 +10,8 @@ import {
   RotateCcw,
   FileSpreadsheet,
 } from "lucide-react";
-import {
-  Document,
-  HeadingLevel,
-  Packer,
-  Paragraph,
-  TextRun,
-  PageBreak,
-} from "docx";
 
-const API_URL = "http://localhost:3001/api/questions";
+const API_URL = `${import.meta.env.VITE_API_BASE_URL || ""}/api/questions`;
 
 const selectStyle = {
   display: "block",
@@ -176,6 +167,12 @@ function isApproved(question) {
   );
 }
 function hasValidEvidence(question) {
+  // Trust the server's verification against the linked PDF, not just the
+  // database status label. Old records may incorrectly say "verified".
+  if (question.evidenceValid !== true && question.evidence_valid !== true) {
+    return false;
+  }
+
   const evidence = getSourceEvidence(question).trim();
   const evidenceStatus = getEvidenceStatus(question).toLowerCase();
 
@@ -201,6 +198,7 @@ function normalizeType(type) {
 function getSafeFilename(value) {
   return String(value)
     .trim()
+    // eslint-disable-next-line no-control-regex -- Remove Windows-invalid filename control characters.
     .replace(/[<>:"/\\|?*\x00-\x1F]/g, "-")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
@@ -283,6 +281,8 @@ export default function ExportQuestions() {
   }, []);
 
   useEffect(() => {
+    // Async request is triggered here; response state updates happen after awaiting fetch.
+    // eslint-disable-next-line react/set-state-in-effect
     loadQuestions();
   }, [loadQuestions]);
 
@@ -455,7 +455,7 @@ export default function ExportQuestions() {
     return y;
   }
 
-  function exportPDF() {
+  async function exportPDF() {
     if (filteredQuestions.length === 0) {
       setError("No approved questions match the selected filters.");
       return;
@@ -464,6 +464,7 @@ export default function ExportQuestions() {
     try {
       setError("");
 
+      const { jsPDF } = await import("jspdf");
       const doc = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -632,6 +633,8 @@ export default function ExportQuestions() {
 
     try {
       setError("");
+      const { Document, HeadingLevel, Packer, Paragraph, TextRun, PageBreak } =
+        await import("docx");
 
       const selectedDocument =
         documentFilter === "all"

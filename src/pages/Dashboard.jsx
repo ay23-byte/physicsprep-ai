@@ -1,7 +1,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-const API_URL = "http://localhost:3001/api/dashboard/stats";
+const API_URL = `${import.meta.env.VITE_API_BASE_URL || ""}/api/dashboard/stats`;
 
 function StatCard({ label, value, description }) {
   return (
@@ -49,6 +49,8 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
+    // Async request is triggered here; response state updates happen after awaiting fetch.
+    // eslint-disable-next-line react/set-state-in-effect
     loadStats();
   }, [loadStats]);
 

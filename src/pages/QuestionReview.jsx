@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import "./QuestionReview.css";
 
-const API_URL = "http://localhost:3001/api/questions";
+const API_URL = `${import.meta.env.VITE_API_BASE_URL || ""}/api/questions`;
 
 function getStatus(question) {
   return (
@@ -71,11 +71,19 @@ function getEvidence(question) {
 }
 
 function getEvidenceStatus(question) {
-  return (
+  const status = (
     question.evidenceStatus ??
     question.evidence_status ??
     (getEvidence(question).trim() ? "unverified" : "missing")
   ).toLowerCase();
+
+  // A legacy database label can say "verified" even when the server's
+  // check against the linked PDF fails. Show the effective state instead.
+  if (status === "verified" && question.evidenceValid === false) {
+    return "invalid";
+  }
+
+  return status;
 }
 
 function getDocumentName(question) {
@@ -134,6 +142,8 @@ export default function QuestionReview() {
   }, []);
 
   useEffect(() => {
+    // Async request is triggered here; response state updates happen after awaiting fetch.
+    // eslint-disable-next-line react/set-state-in-effect
     loadQuestions();
   }, [loadQuestions]);
 
@@ -172,6 +182,7 @@ export default function QuestionReview() {
       ),
       answer: getAnswer(question),
       explanation: getExplanation(question),
+      sourceEvidence: getEvidence(question),
       topic: getTopic(question) === "Uncategorized" ? "" : getTopic(question),
     });
 
@@ -207,6 +218,7 @@ export default function QuestionReview() {
           options: editForm.options,
           answer: editForm.answer,
           explanation: editForm.explanation,
+          sourceEvidence: editForm.sourceEvidence,
           topic: editForm.topic.trim() || "Uncategorized",
         }),
       });
@@ -539,6 +551,21 @@ export default function QuestionReview() {
                             />
                           </label>
 
+                          <label>
+                            Source evidence quotation
+                            <textarea
+                              rows={4}
+                              value={editForm.sourceEvidence}
+                              onChange={(event) =>
+                                updateField("sourceEvidence", event.target.value)
+                              }
+                              placeholder="Paste an exact quotation from the linked source PDF"
+                            />
+                            <span className="qr-evidence-hint">
+                              Use text copied from the source PDF. Saving changes resets review and evidence verification; verify the quotation again afterward.
+                            </span>
+                          </label>
+
                           <div className="qr-actions">
                             <button
                               type="button"
@@ -606,6 +633,11 @@ export default function QuestionReview() {
                             >
                               Evidence status: {evidenceStatus}
                             </span>
+                            {question.evidenceValid === false && (
+                              <p className="qr-evidence-hint" role="alert">
+                                The stored evidence does not currently pass verification against the linked PDF. Edit the quotation and save it, then verify it again.
+                              </p>
+                            )}
                             <p className="qr-evidence-hint">
                               Mark evidence verified only after checking this
                               quotation against the original PDF. Approval does
