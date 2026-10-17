@@ -10,7 +10,8 @@
     "test": "node --test",
     "preview": "vite preview",
     "server": "node server/index.js",
-    "dev:full": "concurrently \"npm run server\" \"npm run dev\""
+    "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
+    "test:api": "node scripts/smoke-test-api.js"
   },
   "dependencies": {
     "@google/genai": "^2.29.1",
