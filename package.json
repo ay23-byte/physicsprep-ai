@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "server": "node server/index.js",
     "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
-    "test:api": "node scripts/smoke-test-api.js"
+    "test:api": "node scripts/smoke-test-api.js",
+    "check": "npm run lint && npm test && npm run build"
   },
   "dependencies": {
     "@google/genai": "^2.29.1",
