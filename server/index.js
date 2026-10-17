@@ -31,10 +31,23 @@ app.use("/api/pdf", pdfRoutes);
 app.use("/api/questions", questionRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
-// Error handler
+// Error handler: report client input errors without misclassifying them as
+// server failures, and avoid returning stack traces or secrets to the browser.
 app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: "Unexpected server error." });
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  if (err?.type === "entity.parse.failed" || err instanceof SyntaxError && err?.status === 400) {
+    return res.status(400).json({
+      error: "Request body contains invalid JSON.",
+    });
+  }
+
+  console.error("Unhandled API error:", err?.message || err);
+  return res.status(500).json({
+    error: "Unexpected server error.",
+  });
 });
 
 app.listen(PORT, () => {
