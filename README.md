@@ -79,7 +79,15 @@ npm run build
 npm run lint
 ```
 
-The Node test runner is used for backend logic tests. A successful build confirms that Vite can compile the frontend; it does not replace manual end-to-end testing.
+With the backend running in a separate terminal, run the read-only API smoke checks:
+
+```powershell
+npm run test:api
+```
+
+The smoke test checks the health, dashboard, question-list, and PDF-list endpoints without creating, editing, or deleting records. To check a separately hosted API, set `API_BASE_URL` (for example, `$env:API_BASE_URL="http://localhost:3001"`) before running it.
+
+The Node test runner is used for backend logic tests. A successful build confirms that Vite can compile the frontend; the smoke test checks basic API reachability, but neither replaces manual end-to-end testing.
 
 ## Question evidence and approval
 
