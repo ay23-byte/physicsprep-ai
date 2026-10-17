@@ -207,6 +207,7 @@ function normalizeType(type) {
 function getSafeFilename(value) {
   return String(value)
     .trim()
+    // eslint-disable-next-line no-control-regex -- Remove Windows-invalid filename control characters.
     .replace(/[<>:"/\\|?*\x00-\x1F]/g, "-")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
