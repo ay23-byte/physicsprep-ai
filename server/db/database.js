@@ -5,11 +5,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
-const dataDir = path.join(currentDir, "..", "data");
+const defaultDataDir = path.join(currentDir, "..", "data");
+const databasePath = process.env.PHYSICSPREP_DB_PATH
+  ? path.resolve(process.env.PHYSICSPREP_DB_PATH)
+  : path.join(defaultDataDir, "physicsprep.sqlite");
 
-fs.mkdirSync(dataDir, { recursive: true });
-
-const databasePath = path.join(dataDir, "physicsprep.sqlite");
+fs.mkdirSync(path.dirname(databasePath), { recursive: true });
 const db = new Database(databasePath);
 
 db.pragma("journal_mode = WAL");
