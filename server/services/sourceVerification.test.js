@@ -81,3 +81,20 @@ test("does not accept a paraphrase that is not present in the source", () => {
 
   assert.equal(result.verified, false);
 });
+
+
+test("matches a continuous quotation when PDF punctuation and equation glyphs differ", () => {
+  const result = verifyQuestionEvidence(
+    { sourceEvidence: "The equation of motion for the forced simple harmonic oscillator is x''(t) + omega^2*x(t) = F*cos(omega*t), where x(0) = 0 and x'(0) = 0. Which one of the following options is correct?" },
+    "Q.41 The equation of motion for the forced simple harmonic oscillator is ẍ(t) + ω²x(t) = F cos(ωt) where x(t = 0) = 0 and ẋ(t = 0) = 0 Which one of the following options is correct?"
+  );
+  assert.equal(result.verified, true);
+});
+
+test("still rejects reordered or paraphrased evidence in punctuation-insensitive fallback", () => {
+  const result = verifyQuestionEvidence(
+    { sourceEvidence: "The speed of light is variable in vacuum and always constant." },
+    "The speed of light in vacuum is constant."
+  );
+  assert.equal(result.verified, false);
+});
