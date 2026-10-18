@@ -42,7 +42,13 @@ export function verifyQuestionEvidence(question, sourceText) {
     };
   }
 
-  if (source.includes(evidence)) {
+  // Some PDF text extractors insert or drop punctuation around equations and
+  // convert math glyphs differently. Fall back to a strict, contiguous sequence
+  // of words/numbers while retaining order; never accept a bag-of-words match.
+  const evidenceWords = evidence.replace(/[^\\p{L}\\p{N}]+/gu, " ").replace(/\\s+/g, " ").trim();
+  const sourceWords = source.replace(/[^\\p{L}\\p{N}]+/gu, " ").replace(/\\s+/g, " ").trim();
+
+  if (source.includes(evidence) || (evidenceWords.length >= 24 && sourceWords.includes(evidenceWords))) {
     return {
       verified: true,
       status: "verified",
