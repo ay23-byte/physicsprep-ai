@@ -5,7 +5,6 @@ function normalizeForEvidenceMatch(text) {
     .normalize("NFKC")
     // Convert common mathematical glyphs into their spoken/plain-text forms.
     .replace(/ω/g, "omega")
-    .replace(/ω/g, "omega")
     .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
     .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
     .replace(/[\u2010-\u2015\u2212]/g, "-")
