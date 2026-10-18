@@ -7,6 +7,7 @@ const PDFLibrary = lazy(() => import("./pages/PDFLibrary.jsx"));
 const ExportQuestions = lazy(() => import("./pages/ExportQuestions.jsx"));
 const QuestionBank = lazy(() => import("./pages/QuestionBank.jsx"));
 const CoverageTracker = lazy(() => import("./pages/CoverageTracker.jsx"));
+const StudentPractice = lazy(() => import("./pages/StudentPractice.jsx"));
 import {
   Activity,
   ArrowDownToLine,
@@ -19,6 +20,7 @@ import {
   FileText,
   FlaskConical,
   FolderOpen,
+  GraduationCap,
   Gauge,
   LayoutDashboard,
   Library,
@@ -44,6 +46,7 @@ const navigation = [
   { label: "AI Generator", icon: Sparkles, section: "WORKSPACE" },
   { label: "Question Review", icon: CheckCircle2, section: "WORKSPACE" },
   { label: "Question Bank", icon: Library, section: "CONTENT" },
+  { label: "Student Practice", icon: GraduationCap, section: "CONTENT" },
   { label: "Export Questions", icon: ArrowDownToLine, section: "CONTENT" },
   { label: "Coverage Tracker", icon: Target, section: "CONTENT" },
 ];
@@ -352,6 +355,8 @@ function App() {
             <QuestionReview />
           ) : activePage === "Question Bank" ? (
             <QuestionBank onNavigate={navigate} />
+          ) : activePage === "Student Practice" ? (
+            <StudentPractice />
           ) : activePage === "Export Questions" ? (
             <ExportQuestions />
           ) : activePage === "Coverage Tracker" ? (
