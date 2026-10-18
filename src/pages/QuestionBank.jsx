@@ -6,6 +6,7 @@ import {
   LoaderCircle,
   BookOpen,
   Filter,
+  Pencil,
   CheckCircle2,
   Clock3,
   XCircle,
@@ -316,7 +317,7 @@ function StatCard({ label, value, icon, color }) {
   );
 }
 
-export default function QuestionBank() {
+export default function QuestionBank({ onNavigate }) {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -599,20 +600,30 @@ export default function QuestionBank() {
           </p>
         </div>
 
-        <button
-          type="button"
-          style={buttonStyle}
-          onClick={loadQuestions}
-          disabled={loading}
-          aria-label="Refresh question bank"
-        >
-          {loading ? (
-            <LoaderCircle size={16} className="spin" />
-          ) : (
-            <RefreshCw size={16} />
-          )}
-          {loading ? "Loading..." : "Refresh"}
-        </button>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button
+            type="button"
+            style={buttonStyle}
+            onClick={() => onNavigate?.("Question Review")}
+          >
+            <Pencil size={15} />
+            Review / edit questions
+          </button>
+          <button
+            type="button"
+            style={buttonStyle}
+            onClick={loadQuestions}
+            disabled={loading}
+            aria-label="Refresh question bank"
+          >
+            {loading ? (
+              <LoaderCircle size={16} className="spin" />
+            ) : (
+              <RefreshCw size={16} />
+            )}
+            {loading ? "Loading..." : "Refresh"}
+          </button>
+        </div>
       </div>
 
       {/* Statistics */}
