@@ -45,8 +45,23 @@ export function verifyQuestionEvidence(question, sourceText) {
   // Some PDF text extractors insert or drop punctuation around equations and
   // convert math glyphs differently. Fall back to a strict, contiguous sequence
   // of words/numbers while retaining order; never accept a bag-of-words match.
-  const evidenceWords = evidence.replace(/[^\p{L}\p{N}]+/gu, " ").replace(/\s+/g, " ").trim();
-  const sourceWords = source.replace(/[^\p{L}\p{N}]+/gu, " ").replace(/\s+/g, " ").trim();
+  const toWords = (text) => text.replace(/[^\p{L}\p{N}]+/gu, " ").replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
+  const evidenceWords = toWords(evidence);
+  const sourceWords = toWords(source);
+  let hasContinuousWordRun = false;
+
+  // Require at least six consecutive words/numbers from the quotation to occur
+  // in the source. This tolerates changed equation glyphs without accepting
+  // paraphrases or a quotation made only of common short fragments.
+  for (let i = 0; i <= evidenceWords.length - 6 && !hasContinuousWordRun; i += 1) {
+    const run = evidenceWords.slice(i, i + 6).join(" ");
+    for (let j = 0; j <= sourceWords.length - 6; j += 1) {
+      if (sourceWords.slice(j, j + 6).join(" ") === run) {
+        hasContinuousWordRun = true;
+        break;
+      }
+    }
+  }
 
   if (source.includes(evidence) || (evidenceWords.length >= 24 && sourceWords.includes(evidenceWords))) {
     return {
