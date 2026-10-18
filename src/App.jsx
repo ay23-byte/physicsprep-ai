@@ -351,7 +351,7 @@ function App() {
           ) : activePage === "Question Review" ? (
             <QuestionReview />
           ) : activePage === "Question Bank" ? (
-            <QuestionBank />
+            <QuestionBank onNavigate={navigate} />
           ) : activePage === "Export Questions" ? (
             <ExportQuestions />
           ) : activePage === "Coverage Tracker" ? (
