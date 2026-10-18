@@ -3,12 +3,17 @@ function normalizeForEvidenceMatch(text) {
     // PDF extraction commonly introduces line breaks, ligatures, and typographic
     // variants that do not change the words printed in the source.
     .normalize("NFKC")
+    // Convert common mathematical glyphs into their spoken/plain-text forms.
+    .replace(/ω/g, "omega")
+    .replace(/ω/g, "omega")
     .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
     .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
     .replace(/[\u2010-\u2015\u2212]/g, "-")
     .replace(/-\s+/g, "")
     .replace(/[\u00AD\u200B\uFEFF]/g, "")
     .replace(/\s+/g, " ")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .trim()
     .toLocaleLowerCase("en")
     .replace(/^['"]+|['"]+$/g, "");
@@ -63,7 +68,7 @@ export function verifyQuestionEvidence(question, sourceText) {
     }
   }
 
-  if (source.includes(evidence) || (evidenceWords.length >= 24 && sourceWords.includes(evidenceWords))) {
+  if (source.includes(evidence) || hasContinuousWordRun) {
     return {
       verified: true,
       status: "verified",
