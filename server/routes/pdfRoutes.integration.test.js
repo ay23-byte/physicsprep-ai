@@ -477,7 +477,7 @@ test(
 
         assert.deepEqual(
           bodyB.documents.map((document) => document.filename).sort(),
-          ["physics-test.pdf", "user-b.pdf"]
+          ["user-b.pdf"]
         );
       }
     );
