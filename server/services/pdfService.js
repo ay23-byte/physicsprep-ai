@@ -34,8 +34,12 @@ export async function extractPdfText(filePath) {
       info: {},
     };
   } finally {
-    if (pdf) {
+    try {
       await loadingTask.destroy();
+    } finally {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
     }
   }
 }
