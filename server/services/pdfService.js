@@ -1,16 +1,19 @@
-﻿import fs from "node:fs";
+﻿
+import fs from "node:fs";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 
 export async function extractPdfText(filePath) {
+  const buffer = fs.readFileSync(filePath);
+
+  const loadingTask = getDocument({
+    data: new Uint8Array(buffer),
+    useSystemFonts: true,
+  });
+
+  let pdf;
+
   try {
-    const buffer = fs.readFileSync(filePath);
-
-    const loadingTask = getDocument({
-      data: new Uint8Array(buffer),
-      useSystemFonts: true,
-    });
-
-    const pdf = await loadingTask.promise;
+    pdf = await loadingTask.promise;
     const pageTexts = [];
 
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
@@ -31,8 +34,8 @@ export async function extractPdfText(filePath) {
       info: {},
     };
   } finally {
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    if (pdf) {
+      await loadingTask.destroy();
     }
   }
 }
