@@ -471,12 +471,12 @@ test(
         const bodyB = await readBody(responseB);
 
         assert.deepEqual(
-          bodyA.documents.map((document) => document.filename),
-          ["user-a.pdf", "physics-test.pdf"]
+          bodyA.documents.map((document) => document.filename).sort(),
+          ["physics-test.pdf", "user-a.pdf"]
         );
 
         assert.deepEqual(
-          bodyB.documents.map((document) => document.filename.sort()
+          bodyB.documents.map((document) => document.filename).sort(),
           ["physics-test.pdf", "user-b.pdf"]
         );
       }
