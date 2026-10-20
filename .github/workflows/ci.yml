@@ -5,9 +5,11 @@ on:
     branches:
       - main
       - fix/evidence-export-quality
+      - feature/complete-physics-prep-platform
   pull_request:
     branches:
       - main
+      - feature/production-readiness
 
 permissions:
   contents: read
