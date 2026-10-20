@@ -109,3 +109,32 @@ The SQLite database is stored under `server/data/`, which is intentionally ignor
 - **Frontend loads but questions do not:** check that the API terminal is still running and visit `/api/health`.
 - **AI generation fails:** confirm `GEMINI_API_KEY` is present in the root `.env` and restart the backend.
 - **Evidence says invalid:** the quotation must match text extracted from the exact linked PDF. Do not mark it verified just to bypass the check.
+
+
+## Subscription billing (Razorpay)
+
+The Plans & Billing screen includes a real Razorpay Subscriptions integration. Checkout is deliberately disabled until the backend has valid provider credentials and plan IDs; it never pretends a payment succeeded. Configure these values in the server's private `.env` file:
+
+```dotenv
+RAZORPAY_KEY_ID=rzp_test_...
+RAZORPAY_KEY_SECRET=...
+RAZORPAY_WEBHOOK_SECRET=...
+RAZORPAY_PLAN_PRO_MONTHLY=plan_...
+RAZORPAY_PLAN_PRO_YEARLY=plan_...
+BILLING_PRO_MONTHLY_PRICE=49900
+BILLING_PRO_YEARLY_PRICE=499900
+```
+
+Create matching monthly and yearly subscription plans in the Razorpay dashboard. The default display amounts are ₹499/month and ₹4,999/year, expressed in paise; set the Razorpay plan amounts to match them. Start with Razorpay test-mode credentials, and switch to live credentials only after successful end-to-end tests. Never put the key secret or webhook secret in a `VITE_*` variable or commit them.
+
+In Razorpay's webhook settings, configure the endpoint `https://YOUR_PUBLIC_API_HOST/api/billing/webhook` with the same webhook secret, and subscribe to subscription activation/authentication/pending/halted/cancelled/completed/paused/resumed and payment captured/failed events. The backend validates the webhook signature against the exact request body before recording events. Your API must be publicly reachable over HTTPS for Razorpay to deliver webhooks.
+
+Billing API endpoints:
+- `GET /api/billing/plans` — plan catalogue and readiness state.
+- `GET /api/billing/subscription` — current account subscription (login required).
+- `GET /api/billing/history` — provider-confirmed payment history (login required).
+- `POST /api/billing/checkout` with `{"planKey":"pro_monthly"}` or `{"planKey":"pro_yearly"}` — create a provider subscription (login required).
+- `POST /api/billing/cancel` — request cancellation at the end of the billing cycle (login required).
+- `POST /api/billing/webhook` — Razorpay-signed provider events.
+
+The app does not store card or UPI details. A frontend checkout callback alone does not activate a subscription; provider webhook events update status. Before launch, test successful, failed, cancelled, renewal, and duplicate webhook deliveries in Razorpay test mode and confirm the displayed plan amounts match your provider dashboard.
