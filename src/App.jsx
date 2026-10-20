@@ -46,6 +46,7 @@ const QUESTION_TARGET = 450;
 
 const navigation = [
   { label: "Overview", icon: LayoutDashboard, section: "WORKSPACE" },
+  { label: "Plans & Billing", icon: CreditCard, section: "WORKSPACE" },
   { label: "PDF Library", icon: FolderOpen, section: "WORKSPACE" },
   { label: "AI Generator", icon: Sparkles, section: "WORKSPACE" },
   { label: "Question Review", icon: CheckCircle2, section: "WORKSPACE" },
@@ -53,7 +54,6 @@ const navigation = [
   { label: "Student Practice", icon: GraduationCap, section: "CONTENT" },
   { label: "Export Questions", icon: ArrowDownToLine, section: "CONTENT" },
   { label: "Coverage Tracker", icon: Target, section: "CONTENT" },
-  { label: "Plans & Billing", icon: CreditCard, section: "PREFERENCES" },
 ];
 
 const subjectDefinitions = [
