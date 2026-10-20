@@ -76,6 +76,15 @@ router.post("/extract", requireAuth, (req, res) => {
     }
 
     try {
+      // MIME type and extension can be spoofed. Reject files without the PDF
+      // magic header before passing them to the parser.
+      const signature = fs.readFileSync(req.file.path).subarray(0, 5).toString("ascii");
+      if (signature !== "%PDF-") {
+        return res.status(400).json({
+          error: "Please upload a valid PDF file.",
+        });
+      }
+
       let extracted;
 
       try {
