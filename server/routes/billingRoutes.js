@@ -82,14 +82,14 @@ router.post("/cancel", requireAuth, async (req, res) => {
 });
 // Configure express.json with a verify callback in server/index.js so the exact bytes
 // received from Razorpay can be checked before trusting a webhook event.
-router.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
+router.post("/webhook", (req, res) => {
   const signature = req.headers["x-razorpay-signature"];
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
-  if (!secret || !Buffer.isBuffer(req.body)) return res.status(503).json({ error: "Webhook is not configured." });
-  const expected = createHmac("sha256", secret).update(req.body).digest("hex");
+  if (!secret || !Buffer.isBuffer(req.rawBody)) return res.status(503).json({ error: "Webhook is not configured." });
+  const expected = createHmac("sha256", secret).update(req.rawBody).digest("hex");
   if (!safeEqualHex(signature, expected)) return res.status(401).json({ error: "Invalid webhook signature." });
   let event;
-  try { event = JSON.parse(req.body.toString("utf8")); } catch { return res.status(400).json({ error: "Invalid webhook payload." }); }
+  try { event = JSON.parse(req.rawBody.toString("utf8")); } catch { return res.status(400).json({ error: "Invalid webhook payload." }); }
   const subscription = event.payload?.subscription?.entity;
   const payment = event.payload?.payment?.entity;
   const subscriptionId = subscription?.id || payment?.subscription_id;
