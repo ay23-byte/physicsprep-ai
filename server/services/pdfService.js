@@ -1,16 +1,30 @@
-﻿import fs from "node:fs";
+﻿
+import fs from "node:fs";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 
+export const MAX_PDF_PAGES = 300;
+
 export async function extractPdfText(filePath) {
+  const buffer = fs.readFileSync(filePath);
+
+  const loadingTask = getDocument({
+    data: new Uint8Array(buffer),
+    useSystemFonts: true,
+  });
+
+  let pdf;
+
   try {
-    const buffer = fs.readFileSync(filePath);
+    pdf = await loadingTask.promise;
 
-    const loadingTask = getDocument({
-      data: new Uint8Array(buffer),
-      useSystemFonts: true,
-    });
+    if (pdf.numPages > MAX_PDF_PAGES) {
+      const error = new Error(
+        `PDF exceeds the maximum limit of ${MAX_PDF_PAGES} pages.`
+      );
+      error.code = "PDF_PAGE_LIMIT_EXCEEDED";
+      throw error;
+    }
 
-    const pdf = await loadingTask.promise;
     const pageTexts = [];
 
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
@@ -31,8 +45,12 @@ export async function extractPdfText(filePath) {
       info: {},
     };
   } finally {
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    try {
+      await loadingTask.destroy();
+    } finally {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
     }
   }
 }

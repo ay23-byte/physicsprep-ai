@@ -8,6 +8,9 @@ const ExportQuestions = lazy(() => import("./pages/ExportQuestions.jsx"));
 const QuestionBank = lazy(() => import("./pages/QuestionBank.jsx"));
 const CoverageTracker = lazy(() => import("./pages/CoverageTracker.jsx"));
 const StudentPractice = lazy(() => import("./pages/StudentPractice.jsx"));
+const SettingsPage = lazy(() => import("./pages/SettingsPage.jsx"));
+const Billing = lazy(() => import("./pages/Billing.jsx"));
+const AuthScreen = lazy(() => import("./pages/AuthScreen.jsx"));
 import {
   Activity,
   ArrowDownToLine,
@@ -17,6 +20,7 @@ import {
   CheckCircle2,
   ChevronDown,
   CircleHelp,
+  CreditCard,
   FileText,
   FlaskConical,
   FolderOpen,
@@ -49,6 +53,7 @@ const navigation = [
   { label: "Student Practice", icon: GraduationCap, section: "CONTENT" },
   { label: "Export Questions", icon: ArrowDownToLine, section: "CONTENT" },
   { label: "Coverage Tracker", icon: Target, section: "CONTENT" },
+  { label: "Plans & Billing", icon: CreditCard, section: "PREFERENCES" },
 ];
 
 const subjectDefinitions = [
@@ -92,7 +97,7 @@ const activities = [
   },
 ];
 
-function App() {
+function WorkspaceApp() {
   const [activePage, setActivePage] = useState("Overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -361,6 +366,10 @@ function App() {
             <ExportQuestions />
           ) : activePage === "Coverage Tracker" ? (
             <CoverageTracker />
+          ) : activePage === "Settings" ? (
+            <SettingsPage />
+          ) : activePage === "Plans & Billing" ? (
+            <Billing />
           ) : (
             <WorkspacePage page={activePage} onNavigate={navigate} />
           )}
@@ -748,4 +757,21 @@ function WorkspacePage({ page, onNavigate }) {
   );
 }
 
-export default App;
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [checkingSession, setCheckingSession] = useState(true);
+  useEffect(() => {
+    let active = true;
+    fetch('/api/auth/me').then(async (response) => {
+      if (!response.ok) return null;
+      const body = await response.json();
+      return body.user || null;
+    }).catch(() => null).then((currentUser) => {
+      if (active) { setUser(currentUser); setCheckingSession(false); }
+    });
+    return () => { active = false; };
+  }, []);
+  if (checkingSession) return <main style={{minHeight:'100vh',display:'grid',placeItems:'center'}}>Loading your secure workspace…</main>;
+  if (!user) return <Suspense fallback={<div>Loading sign-in…</div>}><AuthScreen onAuthenticated={setUser} /></Suspense>;
+  return <WorkspaceApp />;
+}

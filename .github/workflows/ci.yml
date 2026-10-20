@@ -5,9 +5,11 @@ on:
     branches:
       - main
       - fix/evidence-export-quality
+      - feature/complete-physics-prep-platform
   pull_request:
     branches:
       - main
+      - feature/production-readiness
 
 permissions:
   contents: read
@@ -32,4 +34,6 @@ jobs:
         run: npm run check
 
       - name: Run isolated API regression tests
+        env:
+          SESSION_SECRET: ci-test-session-secret-minimum-32-characters-long
         run: npm run test:api:regression
