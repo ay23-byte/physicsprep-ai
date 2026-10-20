@@ -12,8 +12,9 @@
     "server": "node server/index.js",
     "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
     "test:api": "node scripts/smoke-test-api.js",
-    "test:api:regression": "node --test server/routes/questionRoutes.integration.test.js",
-    "check": "npm run lint && npm test && npm run build"
+    "test:api:regression": "node --test server/routes/questionRoutes.integration.test.js server/routes/pdfRoutes.integration.test.js",
+    "check": "npm run lint && npm test && npm run build",
+    "test:api:pdf": "node --test server/routes/pdfRoutes.integration.test.js"
   },
   "dependencies": {
     "@google/genai": "^2.29.1",

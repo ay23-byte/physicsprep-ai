@@ -24,6 +24,16 @@ function ensureColumn(tableName, columnName, definition) {
   }
 }
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    password_salt TEXT NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+`);
+
 // Store uploaded PDF documents.
 db.exec(`
   CREATE TABLE IF NOT EXISTS documents (
@@ -35,6 +45,9 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 `);
+
+ensureColumn("documents", "owner_id", "INTEGER REFERENCES users(id)");
+db.exec("CREATE INDEX IF NOT EXISTS idx_documents_owner ON documents(owner_id)");
 
 // Store generated questions and their review status.
 db.exec(`

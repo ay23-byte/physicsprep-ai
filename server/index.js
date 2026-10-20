@@ -7,6 +7,7 @@ import generatorRoutes from "./routes/generatorRoutes.js";
 import pdfRoutes from "./routes/pdfRoutes.js";
 import questionRoutes from "./routes/questionRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -43,7 +44,8 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Existing routes
+// Authentication and existing routes
+app.use("/api/auth", authRoutes);
 app.use("/api/generate", generatorRoutes);
 app.use("/api/pdf", pdfRoutes);
 

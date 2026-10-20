@@ -1,5 +1,5 @@
 
-import { PDFDocument, StandardFonts } from "pdf-lib";
+import { jsPDF } from "jspdf";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
@@ -44,18 +44,29 @@ async function readBody(response) {
 async function createTextPdf(
   text = "Selectable PhysicsPrep test text."
 ) {
-  const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([612, 792]);
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-  page.drawText(text, {
-    x: 72,
-    y: 720,
-    size: 18,
-    font,
+  const pdfDoc = new jsPDF({
+    unit: "pt",
+    format: "letter",
   });
 
-  return Buffer.from(await pdfDoc.save());
+  pdfDoc.setFont("helvetica", "normal");
+  pdfDoc.setFontSize(18);
+  pdfDoc.text(text, 72, 72);
+
+  return Buffer.from(pdfDoc.output("arraybuffer"));
+}
+
+async function createMultiPagePdf(pageCount) {
+  const pdfDoc = new jsPDF({
+    unit: "pt",
+    format: "letter",
+  });
+
+  for (let i = 1; i < pageCount; i += 1) {
+    pdfDoc.addPage("letter", "portrait");
+  }
+
+  return Buffer.from(pdfDoc.output("arraybuffer"));
 }
 
 test(
@@ -421,6 +432,31 @@ test(
           currentUploadFiles(),
           before,
           "Malformed PDF uploads should not leave temporary files."
+        );
+      }
+    );
+
+    await t.test(
+      "rejects PDFs exceeding the 300-page limit and cleans up temporary files",
+      async () => {
+        const before = currentUploadFiles();
+        const pdfBytes = await createMultiPagePdf(301);
+
+        const response = await uploadPdf(
+          cookieA,
+          "too-many-pages.pdf",
+          pdfBytes
+        );
+
+        const body = await readBody(response);
+
+        assert.equal(response.status, 400);
+        assert.match(body.error, /300-page limit/i);
+
+        assert.deepEqual(
+          currentUploadFiles(),
+          before,
+          "Rejected page-limit uploads should not leave temporary files."
         );
       }
     );

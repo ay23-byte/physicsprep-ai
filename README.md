@@ -21,11 +21,12 @@ Create a local `.env` file in the project root. Do not commit this file:
 ```dotenv
 GEMINI_API_KEY=your_gemini_api_key_here
 PORT=3001
+SESSION_SECRET=replace-with-a-random-secret-at-least-32-characters
 # Optional: comma-separated additional browser origins for a separately hosted frontend
 # CORS_ORIGINS=https://your-frontend.example.com
 ```
 
-The backend loads environment variables from `.env`. Keep your real API key private. The Vite development server proxies `/api` requests to `http://localhost:3001`, so the frontend does not need a hardcoded localhost API URL. For a separately hosted API, set `VITE_API_BASE_URL` in the frontend environment (for example, `https://api.example.com`) before building; do not put secrets in `VITE_` variables.
+The backend loads environment variables from `.env`. Keep your real API key and session secret private. Set `SESSION_SECRET` to a unique random value of at least 32 characters before using accounts; do not reuse the example value in a deployed environment. The Vite development server proxies `/api` requests to `http://localhost:3001`, so the frontend does not need a hardcoded localhost API URL. For a separately hosted API, set `VITE_API_BASE_URL` in the frontend environment (for example, `https://api.example.com`) before building; do not put secrets in `VITE_` variables.
 
 ## Run the app
 
@@ -62,6 +63,7 @@ Open http://localhost:3001/api/health in your browser. A healthy server returns 
 The API currently mounts these route groups:
 
 - `/api/health` — backend health check
+- `/api/auth` — account registration, sign-in, sign-out, and current-session check
 - `/api/generate` — question generation
 - `/api/pdf` — source PDF operations
 - `/api/questions` — question CRUD, review, evidence verification, and read-only quality audit

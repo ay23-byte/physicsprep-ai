@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 
 import db from "../db/database.js";
 import { extractPdfText } from "../services/pdfService.js";
+import requireAuth from "../middleware/requireAuth.js";
 
 const router = express.Router();
 
@@ -56,7 +57,7 @@ function removeTemporaryFile(filePath) {
 
 // POST /api/pdf/extract
 // Upload a PDF, extract its text, and save its metadata and text in SQLite.
-router.post("/extract", (req, res) => {
+router.post("/extract", requireAuth, (req, res) => {
   upload.single("pdf")(req, res, async (uploadError) => {
     if (uploadError) {
       const status = uploadError instanceof multer.MulterError
@@ -75,7 +76,31 @@ router.post("/extract", (req, res) => {
     }
 
     try {
-      const extracted = await extractPdfText(req.file.path);
+      // MIME type and extension can be spoofed. Reject files without the PDF
+      // magic header before passing them to the parser.
+      const signature = fs.readFileSync(req.file.path).subarray(0, 5).toString("ascii");
+      if (signature !== "%PDF-") {
+        return res.status(400).json({
+          error: "Please upload a valid PDF file.",
+        });
+      }
+
+      let extracted;
+
+      try {
+        extracted = await extractPdfText(req.file.path);
+      } catch (error) {
+        if (error?.code === "PDF_PAGE_LIMIT_EXCEEDED") {
+          return res.status(400).json({
+            error: "PDF exceeds the 300-page limit.",
+          });
+        }
+
+        console.error("PDF parser failed:", error?.stack || error);
+        return res.status(422).json({
+          error: "This PDF could not be parsed. Please try another PDF.",
+        });
+      }
 
       if (
         !extracted ||
@@ -93,17 +118,11 @@ router.post("/extract", (req, res) => {
 
       const result = db.prepare(`
         INSERT INTO documents (
-          filename,
-          pages,
-          characters,
-          extracted_text
-        )
-        VALUES (?, ?, ?, ?)
+          owner_id, filename, pages, characters, extracted_text
+        ) VALUES (?, ?, ?, ?, ?)
       `).run(
-        req.file.originalname,
-        extracted.pages ?? 0,
-        characters,
-        extracted.text
+        req.user.id, req.file.originalname, extracted.pages ?? 0,
+        characters, extracted.text
       );
 
       const document = db.prepare(`
@@ -136,7 +155,7 @@ router.post("/extract", (req, res) => {
 
 // GET /api/pdf/documents
 // List saved documents without returning their full extracted text.
-router.get("/documents", (req, res) => {
+router.get("/documents", requireAuth, (req, res) => {
   try {
     const documents = db.prepare(`
       SELECT
@@ -146,8 +165,9 @@ router.get("/documents", (req, res) => {
         characters,
         created_at AS createdAt
       FROM documents
+      WHERE owner_id = ?
       ORDER BY id DESC
-    `).all();
+    `).all(req.user.id);
 
     return res.json({ documents });
   } catch (error) {
@@ -161,7 +181,7 @@ router.get("/documents", (req, res) => {
 
 // GET /api/pdf/documents/:id
 // Retrieve one saved document, including its extracted text.
-router.get("/documents/:id", (req, res) => {
+router.get("/documents/:id", requireAuth, (req, res) => {
   const id = parseDocumentId(req.params.id);
 
   if (!id) {
@@ -180,8 +200,8 @@ router.get("/documents/:id", (req, res) => {
         extracted_text AS text,
         created_at AS createdAt
       FROM documents
-      WHERE id = ?
-    `).get(id);
+      WHERE id = ? AND owner_id = ?
+    `).get(id, req.user.id);
 
     if (!document) {
       return res.status(404).json({
@@ -202,7 +222,7 @@ router.get("/documents/:id", (req, res) => {
 // GET /api/pdf/documents/:id/questions
 // Return questions belonging to a particular PDF.
 // Useful for showing the actual source filename with exported questions.
-router.get("/documents/:id/questions", (req, res) => {
+router.get("/documents/:id/questions", requireAuth, (req, res) => {
   const id = parseDocumentId(req.params.id);
 
   if (!id) {
@@ -215,8 +235,8 @@ router.get("/documents/:id/questions", (req, res) => {
     const document = db.prepare(`
       SELECT id, filename, pages, created_at AS createdAt
       FROM documents
-      WHERE id = ?
-    `).get(id);
+      WHERE id = ? AND owner_id = ?
+    `).get(id, req.user.id);
 
     if (!document) {
       return res.status(404).json({
@@ -266,7 +286,7 @@ router.get("/documents/:id/questions", (req, res) => {
 // DELETE /api/pdf/documents/:id
 // Delete a document record. Its related questions are deleted only if
 // the database foreign key is configured with ON DELETE CASCADE.
-router.delete("/documents/:id", (req, res) => {
+router.delete("/documents/:id", requireAuth, (req, res) => {
   const id = parseDocumentId(req.params.id);
 
   if (!id) {
@@ -277,8 +297,8 @@ router.delete("/documents/:id", (req, res) => {
 
   try {
     const result = db.prepare(
-      "DELETE FROM documents WHERE id = ?"
-    ).run(id);
+      "DELETE FROM documents WHERE id = ? AND owner_id = ?"
+    ).run(id, req.user.id);
 
     if (result.changes === 0) {
       return res.status(404).json({
