@@ -6,10 +6,12 @@ on:
       - main
       - fix/evidence-export-quality
       - feature/complete-physics-prep-platform
+      - feature/razorpay-subscriptions-hardening
   pull_request:
     branches:
       - main
       - feature/production-readiness
+      - feature/complete-physics-prep-platform
 
 permissions:
   contents: read
