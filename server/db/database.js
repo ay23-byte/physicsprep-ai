@@ -95,4 +95,36 @@ ensureColumn(
   "TEXT NOT NULL DEFAULT 'unverified'"
 );
 
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS billing_subscriptions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    plan_key TEXT NOT NULL,
+    provider_subscription_id TEXT NOT NULL UNIQUE,
+    status TEXT NOT NULL DEFAULT 'created',
+    current_period_start TEXT,
+    current_period_end TEXT,
+    cancel_at_period_end INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_billing_subscriptions_user
+    ON billing_subscriptions(user_id, id DESC);
+  CREATE TABLE IF NOT EXISTS billing_payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    provider_payment_id TEXT NOT NULL UNIQUE,
+    provider_subscription_id TEXT NOT NULL,
+    amount INTEGER NOT NULL DEFAULT 0,
+    currency TEXT NOT NULL DEFAULT 'INR',
+    status TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    paid_at TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_billing_payments_user
+    ON billing_payments(user_id, id DESC);
+`);
+
 export default db;
