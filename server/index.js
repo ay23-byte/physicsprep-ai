@@ -8,6 +8,7 @@ import pdfRoutes from "./routes/pdfRoutes.js";
 import questionRoutes from "./routes/questionRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import billingRoutes from "./routes/billingRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -33,7 +34,7 @@ app.use(cors({
     return callback(new Error("Origin is not allowed by CORS."));
   },
 }));
-app.use(express.json({ limit: "1mb" }));
+app.use(express.json({ limit: "1mb", verify(req, res, buffer) { req.rawBody = Buffer.from(buffer); } }));
 
 // Health check
 app.get("/api/health", (req, res) => {
@@ -46,6 +47,7 @@ app.get("/api/health", (req, res) => {
 
 // Authentication and existing routes
 app.use("/api/auth", authRoutes);
+app.use("/api/billing", billingRoutes);
 app.use("/api/generate", generatorRoutes);
 app.use("/api/pdf", pdfRoutes);
 
