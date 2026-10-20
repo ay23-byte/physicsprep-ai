@@ -1,5 +1,5 @@
 
-import { PDFDocument, StandardFonts } from "pdf-lib";
+import { jsPDF } from "jspdf";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
@@ -44,28 +44,29 @@ async function readBody(response) {
 async function createTextPdf(
   text = "Selectable PhysicsPrep test text."
 ) {
-  const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([612, 792]);
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-  page.drawText(text, {
-    x: 72,
-    y: 720,
-    size: 18,
-    font,
+  const pdfDoc = new jsPDF({
+    unit: "pt",
+    format: "letter",
   });
 
-  return Buffer.from(await pdfDoc.save());
+  pdfDoc.setFont("helvetica", "normal");
+  pdfDoc.setFontSize(18);
+  pdfDoc.text(text, 72, 72);
+
+  return Buffer.from(pdfDoc.output("arraybuffer"));
 }
 
 async function createMultiPagePdf(pageCount) {
-  const pdfDoc = await PDFDocument.create();
+  const pdfDoc = new jsPDF({
+    unit: "pt",
+    format: "letter",
+  });
 
-  for (let i = 0; i < pageCount; i += 1) {
-    pdfDoc.addPage([612, 792]);
+  for (let i = 1; i < pageCount; i += 1) {
+    pdfDoc.addPage("letter", "portrait");
   }
 
-  return Buffer.from(await pdfDoc.save());
+  return Buffer.from(pdfDoc.output("arraybuffer"));
 }
 
 test(
