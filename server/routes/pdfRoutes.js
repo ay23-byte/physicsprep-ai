@@ -75,7 +75,22 @@ router.post("/extract", (req, res) => {
     }
 
     try {
-      const extracted = await extractPdfText(req.file.path);
+      let extracted;
+
+      try {
+        extracted = await extractPdfText(req.file.path);
+      } catch (error) {
+        if (error?.code === "PDF_PAGE_LIMIT_EXCEEDED") {
+          return res.status(400).json({
+            error: "PDF exceeds the 300-page limit.",
+          });
+        }
+
+        console.error("PDF parser failed:", error?.stack || error);
+        return res.status(422).json({
+          error: "This PDF could not be parsed. Please try another PDF.",
+        });
+      }
 
       if (
         !extracted ||
