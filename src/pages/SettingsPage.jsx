@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Check, Settings as SettingsIcon, RotateCcw } from "lucide-react";
 
 const DEFAULTS = {
@@ -22,12 +22,9 @@ export default function SettingsPage() {
   const [preferences, setPreferences] = useState(readPreferences);
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    setSaved(false);
-  }, [preferences]);
-
   function update(key, value) {
     setPreferences((current) => ({ ...current, [key]: value }));
+    setSaved(false);
   }
 
   function save() {
