@@ -12,7 +12,7 @@
     "server": "node server/index.js",
     "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
     "test:api": "node scripts/smoke-test-api.js",
-    "test:api:regression": "node --test server/routes/questionRoutes.integration.test.js server/routes/pdfRoutes.integration.test.js",
+    "test:api:regression": "node --test server/routes/questionRoutes.integration.test.js server/routes/pdfRoutes.integration.test.js server/routes/billingRoutes.integration.test.js",
     "check": "npm run lint && npm test && npm run build",
     "test:api:pdf": "node --test server/routes/pdfRoutes.integration.test.js"
   },
