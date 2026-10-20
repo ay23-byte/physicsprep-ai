@@ -58,6 +58,16 @@ async function createTextPdf(
   return Buffer.from(await pdfDoc.save());
 }
 
+async function createMultiPagePdf(pageCount) {
+  const pdfDoc = await PDFDocument.create();
+
+  for (let i = 0; i < pageCount; i += 1) {
+    pdfDoc.addPage([612, 792]);
+  }
+
+  return Buffer.from(await pdfDoc.save());
+}
+
 test(
   "PDF API requires authentication, isolates ownership, and validates uploads",
   async (t) => {
@@ -421,6 +431,31 @@ test(
           currentUploadFiles(),
           before,
           "Malformed PDF uploads should not leave temporary files."
+        );
+      }
+    );
+
+    await t.test(
+      "rejects PDFs exceeding the 300-page limit and cleans up temporary files",
+      async () => {
+        const before = currentUploadFiles();
+        const pdfBytes = await createMultiPagePdf(301);
+
+        const response = await uploadPdf(
+          cookieA,
+          "too-many-pages.pdf",
+          pdfBytes
+        );
+
+        const body = await readBody(response);
+
+        assert.equal(response.status, 400);
+        assert.match(body.error, /300-page limit/i);
+
+        assert.deepEqual(
+          currentUploadFiles(),
+          before,
+          "Rejected page-limit uploads should not leave temporary files."
         );
       }
     );
